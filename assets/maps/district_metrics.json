@@ -1,0 +1,1863 @@
+{
+ "meta": {
+  "schemaVersion": "1.0.0",
+  "module": "广州11区交互地图组件（独立）",
+  "reportTitle": "从场景清单到审慎试点：广州市人工智能养老应用的需求匹配、证据成熟度与推广条件研究",
+  "city": "广州市",
+  "level": "district",
+  "districtCount": 11,
+  "generatedAt": "2026-10-28T20:34:15+08:00",
+  "defaultMetric": "bedDensity",
+  "defaultHeightMode": "metric",
+  "scaleNote": "仅区级数据；不含街镇级需求/供给热力图。",
+  "boundary": {
+   "file": "data/gz_districts_11.geojson",
+   "sourceName": "OpenStreetMap contributors（Nominatim lookup）",
+   "sourceUrl": "https://www.openstreetmap.org/",
+   "license": "Open Database License (ODbL) 1.0；© OpenStreetMap contributors；需保留署名，衍生数据库按 ODbL 共享",
+   "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+   "copyrightUrl": "https://www.openstreetmap.org/copyright",
+   "retrievedAt": "2026-10-29T13:36:14+0800",
+   "sha256Original": "aa3e55870e55cc925ab4a55073ce4f6d28c43489023e1c3b9a52e79ea8c8b14e",
+   "crs": "WGS84 (EPSG:4326)，以 OSM/Nominatim 声明为准；未与官方标准画法图独立核验",
+   "geometryQA": "11/11 区要素解析、环闭合与坐标范围基本检查通过；拓扑重叠/官方界线一致性未独立核验",
+   "disclaimer": "非官方勘定界线，不用于米级定位或官方界线发布；地图审核/审图号未取得；本轮仅内部评审/离线候选，未发布到正式站点。",
+   "reviewStatus": "not_obtained",
+   "reviewNote": "公开或正式提交前仍需按地图审核规定确认责任主体、申请路径与审图号；本轮未取得审图号，不声称合规。"
+  },
+  "populationSource": {
+   "name": "《2025年广州市老年人口和老龄事业统计数据》",
+   "publisher": "广州市民政局",
+   "year": 2025,
+   "basis": "户籍人口",
+   "file": "population_2025_registered_district.csv",
+   "fileSha256": "326f4e4157d3ef3a833042982ca75fc0b2f87547ac06085312500a1aaf4cf9ca",
+   "note": "分区合计与全市口径四项差额均为 0；80+ 占比分母为 60+ 人口（C-03）。"
+  },
+  "facilitySource": {
+   "eldercare": {
+    "file": "eldercare_20260923.json",
+    "fileSha256": "c90834ecfa96f87e8f4af64bee69e6a377960fb0286fca1167ee10a2a23a388c",
+    "snapshotDate": "2026-09-23",
+    "note": "235 家、备案床位 55,777 张；备案床位为机构自报值。"
+   },
+   "meals": {
+    "file": "elder_meals_20250205.csv",
+    "fileSha256": "9c2bf9c86f7739d6ae36099fb91648ff7fad8b41754827264f0ca338449efa2d",
+    "snapshotDate": "2025-02-05",
+    "note": "1,399 条记录、1,397 个唯一地址（2 组同址重复）。"
+   },
+   "primaryCare": {
+    "file": "medical_primary_202311.csv",
+    "fileSha256": "84ebcdf2b85173fceaecac7720bb2a2ac8c1b6dbfa9c5b48883720962e898cf0",
+    "snapshotDate": "2023-11",
+    "note": "194 家；44 条地址无区名，以上报区字段为准。"
+   }
+  },
+  "derivedTable": {
+   "file": "_stats_round1.json",
+   "fileSha256": "b2c36a0193d5e621c0587dd2bfb2a6fc2c17f0a06a3447bf4032198ced58ca0e",
+   "note": "本模块全部指标均由原始表重算并与该派生表逐项核对（见 checks）。"
+  },
+  "focus": {
+   "status": "not_configured",
+   "ruleId": null,
+   "sourceRef": null,
+   "note": "未在工作区检出报告《从场景清单到审慎试点…》中“重点关注区”的既有判定规则文本；为避免主观选择，组件不预设任何重点关注区，仅提供 focusRule 接口，待报告作者提供规则后接入。"
+  },
+  "hostPage": {
+   "status": "not_found_in_workspace",
+   "note": "工作区内未检出该报告的既有网页工程（仅有报告 PDF/Markdown 与 GIS 分析产物）。本模块按独立组件交付，未修改任何既有网页文件；集成方式见 docs/集成说明.md。"
+  },
+  "missingData": {
+   "principle": "缺失一律显示为“缺失”，不以 0 代替；组件对 null 值渲染斜线底纹并在图例/详情/提示条中标注。",
+   "notAvailable": [
+    "区/街镇级失能等级分布",
+    "独居/空巢户数",
+    "服务申请与未满足需求工单",
+    "告警日志、设备在用率、误报漏报数据",
+    "非海珠区设施坐标",
+    "其他 10 区街镇边界",
+    "完整路网（真实可达性）"
+   ],
+   "note": "上述缺口决定本模块只能呈现区级人口结构与供给密度代理，不能生成街镇级需求热力图或供需匹配结论。"
+  },
+  "boundariesOfUse": [
+   "床位密度等供给密度指标是代理指标，不等于服务能力、可达性或需求满足率。",
+   "不得把床位密度解释为养老需求或供需匹配程度。",
+   "统计相关不呈现为因果；本模块不含因果关系结论。",
+   "老年人口比例≠失能需求；不得据单一老龄化率选择“最需要 AI 养老”的区。",
+   "不得由单点单次田野观察推断全市空间分布。"
+  ]
+ },
+ "metrics": [
+  {
+   "id": "bedDensity",
+   "label": "备案床位密度（每千名 60+ 老人）",
+   "shortLabel": "床位代理密度",
+   "unit": "床 / 千名 60+",
+   "years": "床位 2026-09；人口 2025 年末",
+   "numerator": "养老机构备案床位（2026-09-23 名录，机构自报）",
+   "denominator": "2025 年末户籍 60 岁及以上人口 ÷ 1000",
+   "decimals": 1,
+   "primary": true,
+   "source": "养老机构名录 eldercare_20260923.json；《2025年广州市老年人口和老龄事业统计数据》人口表",
+   "qualityNote": "分子与分母跨年（2026 床位 ÷ 2025 人口）；备案床位≠可用床位≠服务能力；不得解释为养老需求或供需匹配程度。"
+  },
+  {
+   "id": "elderly80Share",
+   "label": "高龄化率（80+ 占 60+ 比重）",
+   "shortLabel": "高龄化率",
+   "unit": "%",
+   "years": "2025 年末",
+   "numerator": "户籍 80 岁及以上人口",
+   "denominator": "户籍 60 岁及以上人口",
+   "decimals": 1,
+   "primary": true,
+   "source": "《2025年广州市老年人口和老龄事业统计数据》（市民政局公开件）表格“80岁及以上占本区60岁及以上人口比重”",
+   "qualityNote": "分母为 60+ 人口，不是户籍总人口；官方正文另有“占户籍总人口 2.9%”口径，两者不可混用（口径矛盾登记 C-03）。"
+  },
+  {
+   "id": "elderly60Share",
+   "label": "60+ 人口占户籍人口比重",
+   "shortLabel": "60+ 占比",
+   "unit": "%",
+   "years": "2025 年末",
+   "numerator": "户籍 60 岁及以上人口",
+   "denominator": "户籍总人口",
+   "decimals": 1,
+   "primary": true,
+   "source": "《2025年广州市老年人口和老龄事业统计数据》（市民政局公开件）",
+   "qualityNote": "老年人口比例≠失能需求；不能据此单独选点或判断需求强弱。"
+  },
+  {
+   "id": "mealDensity",
+   "label": "长者饭堂密度（每万名 60+ 老人）",
+   "shortLabel": "长者饭堂密度",
+   "unit": "个 / 万名 60+",
+   "years": "饭堂 2025-02；人口 2025 年末",
+   "numerator": "长者饭堂点位（2025-02-05 名录）",
+   "denominator": "2025 年末户籍 60 岁及以上人口 ÷ 10000",
+   "decimals": 2,
+   "primary": true,
+   "source": "长者饭堂名录 elder_meals_20250205.csv；2025 人口表",
+   "qualityNote": "点位≠服务人次≠服务能力；名录内有 2 组同址重复（共 4 条记录），计数可能虚高约 0.14%。"
+  },
+  {
+   "id": "institutionDensity",
+   "label": "养老机构密度（每万名 60+ 老人）",
+   "shortLabel": "养老机构密度",
+   "unit": "家 / 万名 60+",
+   "years": "机构 2026-09；人口 2025 年末",
+   "numerator": "养老机构数（2026-09-23 名录）",
+   "denominator": "2025 年末户籍 60 岁及以上人口 ÷ 10000",
+   "decimals": 2,
+   "primary": false,
+   "source": "养老机构名录 eldercare_20260923.json；2025 人口表",
+   "qualityNote": "机构数≠床位规模≠服务能力；2 条机构区划归属待核（越秀、荔湾），区级计数可能有轻微错配。"
+  },
+  {
+   "id": "primaryCareDensity",
+   "label": "基层医疗机构密度（每万名 60+ 老人）",
+   "shortLabel": "基层医疗密度",
+   "unit": "家 / 万名 60+",
+   "years": "机构 2023-11；人口 2025 年末",
+   "numerator": "基层医疗卫生机构数（2023-11 名录）",
+   "denominator": "2025 年末户籍 60 岁及以上人口 ÷ 10000",
+   "decimals": 2,
+   "primary": false,
+   "source": "基层医疗名录 medical_primary_202311.csv；2025 人口表",
+   "qualityNote": "时点偏旧（距分析日约 3 年）；44 条地址无区名，只能以上报区字段为准；机构数≠服务能力。"
+  },
+  {
+   "id": "elderly65Share",
+   "label": "65+ 人口占户籍人口比重",
+   "shortLabel": "65+ 占比",
+   "unit": "%",
+   "years": "2025 年末",
+   "numerator": "户籍 65 岁及以上人口",
+   "denominator": "户籍总人口",
+   "decimals": 1,
+   "primary": false,
+   "source": "《2025年广州市老年人口和老龄事业统计数据》（市民政局公开件）",
+   "qualityNote": "人口结构指标，不等于照护需求；与 60+ 占比高度相关，仅作背景。"
+  },
+  {
+   "id": "bedDensitySensitivity",
+   "label": "床位密度（口径敏感度：2020 常住分母）",
+   "shortLabel": "床位密度·敏感度",
+   "unit": "床 / 千名 60+",
+   "years": "床位 2026-09；人口 2020 常住",
+   "numerator": "养老机构备案床位（2026-09-23 名录）",
+   "denominator": "2020 年第七次人口普查常住 60 岁及以上人口 ÷ 1000",
+   "decimals": 1,
+   "primary": false,
+   "group": "sensitivity",
+   "source": "养老机构名录；2020 七普人口表",
+   "qualityNote": "仅用于展示分母口径变化的影响，不可与主床位密度混用或并列排名；两口径差异见详情。"
+  }
+ ],
+ "cityTotals": {
+  "raw": {
+   "总人口2025户籍": 10911370,
+   "60+人口2025户籍": 2216893,
+   "65+人口2025户籍": 1566807,
+   "80+人口2025户籍": 315682,
+   "养老机构数2026": 235,
+   "备案床位数2026": 55777,
+   "长者饭堂点数2025": 1399,
+   "基层医疗机构数2023": 194
+  },
+  "values": {
+   "bedDensity": 25.16,
+   "elderly80Share": 14.24,
+   "elderly60Share": 20.317,
+   "elderly65Share": 14.359,
+   "mealDensity": 6.311,
+   "institutionDensity": 1.06,
+   "primaryCareDensity": 0.875,
+   "bedDensitySensitivity": 26.179
+  },
+  "note": "全市口径为合计值计算，不等同于 11 区算术平均。"
+ },
+ "districts": [
+  {
+   "adcode": "440103",
+   "name": "荔湾区",
+   "values": {
+    "bedDensity": 25.217,
+    "institutionDensity": 1.482,
+    "mealDensity": 6.12,
+    "primaryCareDensity": 0.76,
+    "elderly80Share": 13.927,
+    "elderly60Share": 32.001,
+    "elderly65Share": 23.319,
+    "bedDensitySensitivity": 27.042
+   },
+   "raw": {
+    "totalPopulation2025": 822072,
+    "population60Plus2025": 263072,
+    "population65Plus2025": 191702,
+    "population80Plus2025": 36639,
+    "population60Plus2020": 245323,
+    "registeredBeds2026": 6634,
+    "eldercareInstitutions2026": 39,
+    "elderCareMealSites2025": 161,
+    "primaryCareInstitutions2023": 20
+   },
+   "areaKm2Geometric": 62.948,
+   "flags": [
+    "养老机构区划归属待核 1 条：荔湾区颐乐园（上报荔湾、地址含白云）"
+   ],
+   "missingMetrics": []
+  },
+  {
+   "adcode": "440104",
+   "name": "越秀区",
+   "values": {
+    "bedDensity": 9.07,
+    "institutionDensity": 0.701,
+    "mealDensity": 3.139,
+    "primaryCareDensity": 0.505,
+    "elderly80Share": 16.329,
+    "elderly60Share": 30.818,
+    "elderly65Share": 22.574,
+    "bedDensitySensitivity": 14.004
+   },
+   "raw": {
+    "totalPopulation2025": 1157685,
+    "population60Plus2025": 356778,
+    "population65Plus2025": 261332,
+    "population80Plus2025": 58259,
+    "population60Plus2020": 231081,
+    "registeredBeds2026": 3236,
+    "eldercareInstitutions2026": 25,
+    "elderCareMealSites2025": 112,
+    "primaryCareInstitutions2023": 18
+   },
+   "areaKm2Geometric": 33.751,
+   "flags": [
+    "养老机构区划归属待核 1 条：越秀区东山福利院（上报越秀、地址含黄埔）"
+   ],
+   "missingMetrics": []
+  },
+  {
+   "adcode": "440105",
+   "name": "海珠区",
+   "values": {
+    "bedDensity": 19.133,
+    "institutionDensity": 0.89,
+    "mealDensity": 3.025,
+    "primaryCareDensity": 0.534,
+    "elderly80Share": 15.083,
+    "elderly60Share": 30.1,
+    "elderly65Share": 22.066,
+    "bedDensitySensitivity": 20.794
+   },
+   "raw": {
+    "totalPopulation2025": 1120141,
+    "population60Plus2025": 337162,
+    "population65Plus2025": 247174,
+    "population80Plus2025": 50855,
+    "population60Plus2020": 310238,
+    "registeredBeds2026": 6451,
+    "eldercareInstitutions2026": 30,
+    "elderCareMealSites2025": 102,
+    "primaryCareInstitutions2023": 18
+   },
+   "areaKm2Geometric": 91.356,
+   "flags": [
+    "街道级设施坐标仅海珠可得，且 340 条中仅 95 条 verified=Y；不得将坐标缺失读作设施缺失"
+   ],
+   "missingMetrics": []
+  },
+  {
+   "adcode": "440106",
+   "name": "天河区",
+   "values": {
+    "bedDensity": 18.083,
+    "institutionDensity": 0.907,
+    "mealDensity": 7.092,
+    "primaryCareDensity": 1.386,
+    "elderly80Share": 16.201,
+    "elderly60Share": 16.826,
+    "elderly65Share": 11.679,
+    "bedDensitySensitivity": 17.6
+   },
+   "raw": {
+    "totalPopulation2025": 1114505,
+    "population60Plus2025": 187523,
+    "population65Plus2025": 130162,
+    "population80Plus2025": 30380,
+    "population60Plus2020": 192675,
+    "registeredBeds2026": 3391,
+    "eldercareInstitutions2026": 17,
+    "elderCareMealSites2025": 133,
+    "primaryCareInstitutions2023": 26
+   },
+   "areaKm2Geometric": 137.249,
+   "flags": [
+    "面积口径待核：几何量算约 136.7 km²，常见陆域口径约 96 km²（比值约 1.42），面积类指标对天河可能系统性偏低"
+   ],
+   "missingMetrics": []
+  },
+  {
+   "adcode": "440111",
+   "name": "白云区",
+   "values": {
+    "bedDensity": 55.777,
+    "institutionDensity": 1.758,
+    "mealDensity": 10.419,
+    "primaryCareDensity": 0.986,
+    "elderly80Share": 13.6,
+    "elderly60Share": 18.075,
+    "elderly65Share": 12.854,
+    "bedDensitySensitivity": 41.648
+   },
+   "raw": {
+    "totalPopulation2025": 1290384,
+    "population60Plus2025": 233231,
+    "population65Plus2025": 165862,
+    "population80Plus2025": 31719,
+    "population60Plus2020": 312356,
+    "registeredBeds2026": 13009,
+    "eldercareInstitutions2026": 41,
+    "elderCareMealSites2025": 243,
+    "primaryCareInstitutions2023": 23
+   },
+   "areaKm2Geometric": 665.9,
+   "flags": [],
+   "missingMetrics": []
+  },
+  {
+   "adcode": "440112",
+   "name": "黄埔区",
+   "values": {
+    "bedDensity": 73.276,
+    "institutionDensity": 1.26,
+    "mealDensity": 18.411,
+    "primaryCareDensity": 1.647,
+    "elderly80Share": 13.856,
+    "elderly60Share": 13.474,
+    "elderly65Share": 9.257,
+    "bedDensitySensitivity": 71.121
+   },
+   "raw": {
+    "totalPopulation2025": 765899,
+    "population60Plus2025": 103199,
+    "population65Plus2025": 70903,
+    "population80Plus2025": 14299,
+    "population60Plus2020": 106326,
+    "registeredBeds2026": 7562,
+    "eldercareInstitutions2026": 13,
+    "elderCareMealSites2025": 190,
+    "primaryCareInstitutions2023": 17
+   },
+   "areaKm2Geometric": 483.495,
+   "flags": [],
+   "missingMetrics": []
+  },
+  {
+   "adcode": "440113",
+   "name": "番禺区",
+   "values": {
+    "bedDensity": 27.83,
+    "institutionDensity": 1.14,
+    "mealDensity": 7.98,
+    "primaryCareDensity": 0.829,
+    "elderly80Share": 13.386,
+    "elderly60Share": 15.237,
+    "elderly65Share": 10.491,
+    "bedDensitySensitivity": 23.655
+   },
+   "raw": {
+    "totalPopulation2025": 1266613,
+    "population60Plus2025": 192994,
+    "population65Plus2025": 132886,
+    "population80Plus2025": 25835,
+    "population60Plus2020": 227053,
+    "registeredBeds2026": 5371,
+    "eldercareInstitutions2026": 22,
+    "elderCareMealSites2025": 154,
+    "primaryCareInstitutions2023": 16
+   },
+   "areaKm2Geometric": 520.484,
+   "flags": [],
+   "missingMetrics": []
+  },
+  {
+   "adcode": "440114",
+   "name": "花都区",
+   "values": {
+    "bedDensity": 37.52,
+    "institutionDensity": 0.912,
+    "mealDensity": 2.8,
+    "primaryCareDensity": 1.237,
+    "elderly80Share": 12.521,
+    "elderly60Share": 16.348,
+    "elderly65Share": 11.302,
+    "bedDensitySensitivity": 36.74
+   },
+   "raw": {
+    "totalPopulation2025": 939398,
+    "population60Plus2025": 153573,
+    "population65Plus2025": 106169,
+    "population80Plus2025": 19229,
+    "population60Plus2020": 156832,
+    "registeredBeds2026": 5762,
+    "eldercareInstitutions2026": 14,
+    "elderCareMealSites2025": 43,
+    "primaryCareInstitutions2023": 19
+   },
+   "areaKm2Geometric": 971.497,
+   "flags": [],
+   "missingMetrics": []
+  },
+  {
+   "adcode": "440115",
+   "name": "南沙区",
+   "values": {
+    "bedDensity": 12.71,
+    "institutionDensity": 1.293,
+    "mealDensity": 13.625,
+    "primaryCareDensity": 0.895,
+    "elderly80Share": 12.617,
+    "elderly60Share": 16.861,
+    "elderly65Share": 11.416,
+    "bedDensitySensitivity": 13.859
+   },
+   "raw": {
+    "totalPopulation2025": 596370,
+    "population60Plus2025": 100551,
+    "population65Plus2025": 68084,
+    "population80Plus2025": 12687,
+    "population60Plus2020": 92215,
+    "registeredBeds2026": 1278,
+    "eldercareInstitutions2026": 13,
+    "elderCareMealSites2025": 137,
+    "primaryCareInstitutions2023": 9
+   },
+   "areaKm2Geometric": 842.56,
+   "flags": [],
+   "missingMetrics": []
+  },
+  {
+   "adcode": "440117",
+   "name": "从化区",
+   "values": {
+    "bedDensity": 7.902,
+    "institutionDensity": 0.907,
+    "mealDensity": 2.449,
+    "primaryCareDensity": 1.089,
+    "elderly80Share": 12.217,
+    "elderly60Share": 16.449,
+    "elderly65Share": 10.801,
+    "bedDensitySensitivity": 9.695
+   },
+   "raw": {
+    "totalPopulation2025": 670142,
+    "population60Plus2025": 110230,
+    "population65Plus2025": 72385,
+    "population80Plus2025": 13467,
+    "population60Plus2020": 89837,
+    "registeredBeds2026": 871,
+    "eldercareInstitutions2026": 10,
+    "elderCareMealSites2025": 27,
+    "primaryCareInstitutions2023": 12
+   },
+   "areaKm2Geometric": 1988.039,
+   "flags": [],
+   "missingMetrics": []
+  },
+  {
+   "adcode": "440118",
+   "name": "增城区",
+   "values": {
+    "bedDensity": 12.387,
+    "institutionDensity": 0.616,
+    "mealDensity": 5.432,
+    "primaryCareDensity": 0.896,
+    "elderly80Share": 12.495,
+    "elderly60Share": 15.287,
+    "elderly65Share": 10.285,
+    "bedDensitySensitivity": 13.272
+   },
+   "raw": {
+    "totalPopulation2025": 1168161,
+    "population60Plus2025": 178580,
+    "population65Plus2025": 120148,
+    "population80Plus2025": 22313,
+    "population60Plus2020": 166662,
+    "registeredBeds2026": 2212,
+    "eldercareInstitutions2026": 11,
+    "elderCareMealSites2025": 97,
+    "primaryCareInstitutions2023": 16
+   },
+   "areaKm2Geometric": 1616.998,
+   "flags": [],
+   "missingMetrics": []
+  }
+ ],
+ "checks": [
+  {
+   "check": "边界要素数 = 11",
+   "ok": true,
+   "detail": "实际 11"
+  },
+  {
+   "check": "adcode↔区名对应 440103",
+   "ok": true,
+   "detail": "荔湾区 vs 荔湾区"
+  },
+  {
+   "check": "adcode↔区名对应 440104",
+   "ok": true,
+   "detail": "越秀区 vs 越秀区"
+  },
+  {
+   "check": "adcode↔区名对应 440105",
+   "ok": true,
+   "detail": "海珠区 vs 海珠区"
+  },
+  {
+   "check": "adcode↔区名对应 440106",
+   "ok": true,
+   "detail": "天河区 vs 天河区"
+  },
+  {
+   "check": "adcode↔区名对应 440111",
+   "ok": true,
+   "detail": "白云区 vs 白云区"
+  },
+  {
+   "check": "adcode↔区名对应 440112",
+   "ok": true,
+   "detail": "黄埔区 vs 黄埔区"
+  },
+  {
+   "check": "adcode↔区名对应 440113",
+   "ok": true,
+   "detail": "番禺区 vs 番禺区"
+  },
+  {
+   "check": "adcode↔区名对应 440114",
+   "ok": true,
+   "detail": "花都区 vs 花都区"
+  },
+  {
+   "check": "adcode↔区名对应 440115",
+   "ok": true,
+   "detail": "南沙区 vs 南沙区"
+  },
+  {
+   "check": "adcode↔区名对应 440117",
+   "ok": true,
+   "detail": "从化区 vs 从化区"
+  },
+  {
+   "check": "adcode↔区名对应 440118",
+   "ok": true,
+   "detail": "增城区 vs 增城区"
+  },
+  {
+   "check": "adcode 集合完整",
+   "ok": true,
+   "detail": "[] 缺；[] 多"
+  },
+  {
+   "check": "荔湾区 为单环 MultiPolygon",
+   "ok": true,
+   "detail": "type=MultiPolygon parts=1"
+  },
+  {
+   "check": "荔湾区 环闭合",
+   "ok": true,
+   "detail": "首尾=[113.242883, 23.159608] / [113.242883, 23.159608]"
+  },
+  {
+   "check": "荔湾区 环顶点数≥4",
+   "ok": true,
+   "detail": "76"
+  },
+  {
+   "check": "荔湾区 无自相交",
+   "ok": true,
+   "detail": "检测到自相交"
+  },
+  {
+   "check": "荔湾区 面积为正",
+   "ok": true,
+   "detail": "62.948 km²"
+  },
+  {
+   "check": "越秀区 为单环 MultiPolygon",
+   "ok": true,
+   "detail": "type=MultiPolygon parts=1"
+  },
+  {
+   "check": "越秀区 环闭合",
+   "ok": true,
+   "detail": "首尾=[113.242883, 23.159608] / [113.242883, 23.159608]"
+  },
+  {
+   "check": "越秀区 环顶点数≥4",
+   "ok": true,
+   "detail": "69"
+  },
+  {
+   "check": "越秀区 无自相交",
+   "ok": true,
+   "detail": "检测到自相交"
+  },
+  {
+   "check": "越秀区 面积为正",
+   "ok": true,
+   "detail": "33.751 km²"
+  },
+  {
+   "check": "海珠区 为单环 MultiPolygon",
+   "ok": true,
+   "detail": "type=MultiPolygon parts=1"
+  },
+  {
+   "check": "海珠区 环闭合",
+   "ok": true,
+   "detail": "首尾=[113.323058, 23.109211] / [113.323058, 23.109211]"
+  },
+  {
+   "check": "海珠区 环顶点数≥4",
+   "ok": true,
+   "detail": "50"
+  },
+  {
+   "check": "海珠区 无自相交",
+   "ok": true,
+   "detail": "检测到自相交"
+  },
+  {
+   "check": "海珠区 面积为正",
+   "ok": true,
+   "detail": "91.356 km²"
+  },
+  {
+   "check": "天河区 为单环 MultiPolygon",
+   "ok": true,
+   "detail": "type=MultiPolygon parts=1"
+  },
+  {
+   "check": "天河区 环闭合",
+   "ok": true,
+   "detail": "首尾=[113.306239, 23.159764] / [113.306239, 23.159764]"
+  },
+  {
+   "check": "天河区 环顶点数≥4",
+   "ok": true,
+   "detail": "105"
+  },
+  {
+   "check": "天河区 无自相交",
+   "ok": true,
+   "detail": "检测到自相交"
+  },
+  {
+   "check": "天河区 面积为正",
+   "ok": true,
+   "detail": "137.249 km²"
+  },
+  {
+   "check": "白云区 为单环 MultiPolygon",
+   "ok": true,
+   "detail": "type=MultiPolygon parts=1"
+  },
+  {
+   "check": "白云区 环闭合",
+   "ok": true,
+   "detail": "首尾=[113.306239, 23.159764] / [113.306239, 23.159764]"
+  },
+  {
+   "check": "白云区 环顶点数≥4",
+   "ok": true,
+   "detail": "344"
+  },
+  {
+   "check": "白云区 无自相交",
+   "ok": true,
+   "detail": "检测到自相交"
+  },
+  {
+   "check": "白云区 面积为正",
+   "ok": true,
+   "detail": "665.900 km²"
+  },
+  {
+   "check": "黄埔区 为单环 MultiPolygon",
+   "ok": true,
+   "detail": "type=MultiPolygon parts=1"
+  },
+  {
+   "check": "黄埔区 环闭合",
+   "ok": true,
+   "detail": "首尾=[113.414666, 23.098121] / [113.414666, 23.098121]"
+  },
+  {
+   "check": "黄埔区 环顶点数≥4",
+   "ok": true,
+   "detail": "325"
+  },
+  {
+   "check": "黄埔区 无自相交",
+   "ok": true,
+   "detail": "检测到自相交"
+  },
+  {
+   "check": "黄埔区 面积为正",
+   "ok": true,
+   "detail": "483.495 km²"
+  },
+  {
+   "check": "番禺区 为单环 MultiPolygon",
+   "ok": true,
+   "detail": "type=MultiPolygon parts=1"
+  },
+  {
+   "check": "番禺区 环闭合",
+   "ok": true,
+   "detail": "首尾=[113.256122, 23.043908] / [113.256122, 23.043908]"
+  },
+  {
+   "check": "番禺区 环顶点数≥4",
+   "ok": true,
+   "detail": "130"
+  },
+  {
+   "check": "番禺区 无自相交",
+   "ok": true,
+   "detail": "检测到自相交"
+  },
+  {
+   "check": "番禺区 面积为正",
+   "ok": true,
+   "detail": "520.484 km²"
+  },
+  {
+   "check": "花都区 为单环 MultiPolygon",
+   "ok": true,
+   "detail": "type=MultiPolygon parts=1"
+  },
+  {
+   "check": "花都区 环闭合",
+   "ok": true,
+   "detail": "首尾=[113.472989, 23.428662] / [113.472989, 23.428662]"
+  },
+  {
+   "check": "花都区 环顶点数≥4",
+   "ok": true,
+   "detail": "410"
+  },
+  {
+   "check": "花都区 无自相交",
+   "ok": true,
+   "detail": "检测到自相交"
+  },
+  {
+   "check": "花都区 面积为正",
+   "ok": true,
+   "detail": "971.497 km²"
+  },
+  {
+   "check": "南沙区 为单环 MultiPolygon",
+   "ok": true,
+   "detail": "type=MultiPolygon parts=1"
+  },
+  {
+   "check": "南沙区 环闭合",
+   "ok": true,
+   "detail": "首尾=[113.300423, 22.877056] / [113.300423, 22.877056]"
+  },
+  {
+   "check": "南沙区 环顶点数≥4",
+   "ok": true,
+   "detail": "121"
+  },
+  {
+   "check": "南沙区 无自相交",
+   "ok": true,
+   "detail": "检测到自相交"
+  },
+  {
+   "check": "南沙区 面积为正",
+   "ok": true,
+   "detail": "842.560 km²"
+  },
+  {
+   "check": "从化区 为单环 MultiPolygon",
+   "ok": true,
+   "detail": "type=MultiPolygon parts=1"
+  },
+  {
+   "check": "从化区 环闭合",
+   "ok": true,
+   "detail": "首尾=[113.83256, 23.619879] / [113.83256, 23.619879]"
+  },
+  {
+   "check": "从化区 环顶点数≥4",
+   "ok": true,
+   "detail": "570"
+  },
+  {
+   "check": "从化区 无自相交",
+   "ok": true,
+   "detail": "检测到自相交"
+  },
+  {
+   "check": "从化区 面积为正",
+   "ok": true,
+   "detail": "1988.039 km²"
+  },
+  {
+   "check": "增城区 为单环 MultiPolygon",
+   "ok": true,
+   "detail": "type=MultiPolygon parts=1"
+  },
+  {
+   "check": "增城区 环闭合",
+   "ok": true,
+   "detail": "首尾=[113.570336, 23.084204] / [113.570336, 23.084204]"
+  },
+  {
+   "check": "增城区 环顶点数≥4",
+   "ok": true,
+   "detail": "439"
+  },
+  {
+   "check": "增城区 无自相交",
+   "ok": true,
+   "detail": "检测到自相交"
+  },
+  {
+   "check": "增城区 面积为正",
+   "ok": true,
+   "detail": "1616.998 km²"
+  },
+  {
+   "check": "荔湾区 2025 总人口一致",
+   "ok": true,
+   "detail": "822072 vs 822072"
+  },
+  {
+   "check": "荔湾区 2025 60+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "荔湾区 2025 65+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "荔湾区 2025 80+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "荔湾区 2020 常住60+一致",
+   "ok": true,
+   "detail": "245323 vs 245323"
+  },
+  {
+   "check": "越秀区 2025 总人口一致",
+   "ok": true,
+   "detail": "1157685 vs 1157685"
+  },
+  {
+   "check": "越秀区 2025 60+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "越秀区 2025 65+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "越秀区 2025 80+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "越秀区 2020 常住60+一致",
+   "ok": true,
+   "detail": "231081 vs 231081"
+  },
+  {
+   "check": "海珠区 2025 总人口一致",
+   "ok": true,
+   "detail": "1120141 vs 1120141"
+  },
+  {
+   "check": "海珠区 2025 60+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "海珠区 2025 65+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "海珠区 2025 80+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "海珠区 2020 常住60+一致",
+   "ok": true,
+   "detail": "310238 vs 310238"
+  },
+  {
+   "check": "天河区 2025 总人口一致",
+   "ok": true,
+   "detail": "1114505 vs 1114505"
+  },
+  {
+   "check": "天河区 2025 60+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "天河区 2025 65+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "天河区 2025 80+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "天河区 2020 常住60+一致",
+   "ok": true,
+   "detail": "192675 vs 192675"
+  },
+  {
+   "check": "白云区 2025 总人口一致",
+   "ok": true,
+   "detail": "1290384 vs 1290384"
+  },
+  {
+   "check": "白云区 2025 60+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "白云区 2025 65+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "白云区 2025 80+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "白云区 2020 常住60+一致",
+   "ok": true,
+   "detail": "312356 vs 312356"
+  },
+  {
+   "check": "黄埔区 2025 总人口一致",
+   "ok": true,
+   "detail": "765899 vs 765899"
+  },
+  {
+   "check": "黄埔区 2025 60+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "黄埔区 2025 65+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "黄埔区 2025 80+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "黄埔区 2020 常住60+一致",
+   "ok": true,
+   "detail": "106326 vs 106326"
+  },
+  {
+   "check": "番禺区 2025 总人口一致",
+   "ok": true,
+   "detail": "1266613 vs 1266613"
+  },
+  {
+   "check": "番禺区 2025 60+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "番禺区 2025 65+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "番禺区 2025 80+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "番禺区 2020 常住60+一致",
+   "ok": true,
+   "detail": "227053 vs 227053"
+  },
+  {
+   "check": "花都区 2025 总人口一致",
+   "ok": true,
+   "detail": "939398 vs 939398"
+  },
+  {
+   "check": "花都区 2025 60+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "花都区 2025 65+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "花都区 2025 80+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "花都区 2020 常住60+一致",
+   "ok": true,
+   "detail": "156832 vs 156832"
+  },
+  {
+   "check": "南沙区 2025 总人口一致",
+   "ok": true,
+   "detail": "596370 vs 596370"
+  },
+  {
+   "check": "南沙区 2025 60+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "南沙区 2025 65+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "南沙区 2025 80+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "南沙区 2020 常住60+一致",
+   "ok": true,
+   "detail": "92215 vs 92215"
+  },
+  {
+   "check": "从化区 2025 总人口一致",
+   "ok": true,
+   "detail": "670142 vs 670142"
+  },
+  {
+   "check": "从化区 2025 60+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "从化区 2025 65+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "从化区 2025 80+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "从化区 2020 常住60+一致",
+   "ok": true,
+   "detail": "89837 vs 89837"
+  },
+  {
+   "check": "增城区 2025 总人口一致",
+   "ok": true,
+   "detail": "1168161 vs 1168161"
+  },
+  {
+   "check": "增城区 2025 60+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "增城区 2025 65+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "增城区 2025 80+一致",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "增城区 2020 常住60+一致",
+   "ok": true,
+   "detail": "166662 vs 166662"
+  },
+  {
+   "check": "2025 分区合计 = 全市口径（总人口）",
+   "ok": true,
+   "detail": "10911370 vs 10911370"
+  },
+  {
+   "check": "2025 分区合计 = 全市口径（60+）",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "2025 分区合计 = 全市口径（65+）",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "2025 分区合计 = 全市口径（80+）",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "养老机构总数 = 235",
+   "ok": true,
+   "detail": "235"
+  },
+  {
+   "check": "备案床位总数 = 55777",
+   "ok": true,
+   "detail": "55777"
+  },
+  {
+   "check": "荔湾区 机构数一致",
+   "ok": true,
+   "detail": "39 vs 39"
+  },
+  {
+   "check": "荔湾区 备案床位一致",
+   "ok": true,
+   "detail": "6634 vs 6634"
+  },
+  {
+   "check": "越秀区 机构数一致",
+   "ok": true,
+   "detail": "25 vs 25"
+  },
+  {
+   "check": "越秀区 备案床位一致",
+   "ok": true,
+   "detail": "3236 vs 3236"
+  },
+  {
+   "check": "海珠区 机构数一致",
+   "ok": true,
+   "detail": "30 vs 30"
+  },
+  {
+   "check": "海珠区 备案床位一致",
+   "ok": true,
+   "detail": "6451 vs 6451"
+  },
+  {
+   "check": "天河区 机构数一致",
+   "ok": true,
+   "detail": "17 vs 17"
+  },
+  {
+   "check": "天河区 备案床位一致",
+   "ok": true,
+   "detail": "3391 vs 3391"
+  },
+  {
+   "check": "白云区 机构数一致",
+   "ok": true,
+   "detail": "41 vs 41"
+  },
+  {
+   "check": "白云区 备案床位一致",
+   "ok": true,
+   "detail": "13009 vs 13009"
+  },
+  {
+   "check": "黄埔区 机构数一致",
+   "ok": true,
+   "detail": "13 vs 13"
+  },
+  {
+   "check": "黄埔区 备案床位一致",
+   "ok": true,
+   "detail": "7562 vs 7562"
+  },
+  {
+   "check": "番禺区 机构数一致",
+   "ok": true,
+   "detail": "22 vs 22"
+  },
+  {
+   "check": "番禺区 备案床位一致",
+   "ok": true,
+   "detail": "5371 vs 5371"
+  },
+  {
+   "check": "花都区 机构数一致",
+   "ok": true,
+   "detail": "14 vs 14"
+  },
+  {
+   "check": "花都区 备案床位一致",
+   "ok": true,
+   "detail": "5762 vs 5762"
+  },
+  {
+   "check": "南沙区 机构数一致",
+   "ok": true,
+   "detail": "13 vs 13"
+  },
+  {
+   "check": "南沙区 备案床位一致",
+   "ok": true,
+   "detail": "1278 vs 1278"
+  },
+  {
+   "check": "从化区 机构数一致",
+   "ok": true,
+   "detail": "10 vs 10"
+  },
+  {
+   "check": "从化区 备案床位一致",
+   "ok": true,
+   "detail": "871 vs 871"
+  },
+  {
+   "check": "增城区 机构数一致",
+   "ok": true,
+   "detail": "11 vs 11"
+  },
+  {
+   "check": "增城区 备案床位一致",
+   "ok": true,
+   "detail": "2212 vs 2212"
+  },
+  {
+   "check": "长者饭堂记录数 = 1399",
+   "ok": true,
+   "detail": "1399"
+  },
+  {
+   "check": "基层医疗记录数 = 194",
+   "ok": true,
+   "detail": "194"
+  },
+  {
+   "check": "荔湾区 饭堂数一致",
+   "ok": true,
+   "detail": "161 vs 161"
+  },
+  {
+   "check": "荔湾区 基层医疗数一致",
+   "ok": true,
+   "detail": "20 vs 20"
+  },
+  {
+   "check": "越秀区 饭堂数一致",
+   "ok": true,
+   "detail": "112 vs 112"
+  },
+  {
+   "check": "越秀区 基层医疗数一致",
+   "ok": true,
+   "detail": "18 vs 18"
+  },
+  {
+   "check": "海珠区 饭堂数一致",
+   "ok": true,
+   "detail": "102 vs 102"
+  },
+  {
+   "check": "海珠区 基层医疗数一致",
+   "ok": true,
+   "detail": "18 vs 18"
+  },
+  {
+   "check": "天河区 饭堂数一致",
+   "ok": true,
+   "detail": "133 vs 133"
+  },
+  {
+   "check": "天河区 基层医疗数一致",
+   "ok": true,
+   "detail": "26 vs 26"
+  },
+  {
+   "check": "白云区 饭堂数一致",
+   "ok": true,
+   "detail": "243 vs 243"
+  },
+  {
+   "check": "白云区 基层医疗数一致",
+   "ok": true,
+   "detail": "23 vs 23"
+  },
+  {
+   "check": "黄埔区 饭堂数一致",
+   "ok": true,
+   "detail": "190 vs 190"
+  },
+  {
+   "check": "黄埔区 基层医疗数一致",
+   "ok": true,
+   "detail": "17 vs 17"
+  },
+  {
+   "check": "番禺区 饭堂数一致",
+   "ok": true,
+   "detail": "154 vs 154"
+  },
+  {
+   "check": "番禺区 基层医疗数一致",
+   "ok": true,
+   "detail": "16 vs 16"
+  },
+  {
+   "check": "花都区 饭堂数一致",
+   "ok": true,
+   "detail": "43 vs 43"
+  },
+  {
+   "check": "花都区 基层医疗数一致",
+   "ok": true,
+   "detail": "19 vs 19"
+  },
+  {
+   "check": "南沙区 饭堂数一致",
+   "ok": true,
+   "detail": "137 vs 137"
+  },
+  {
+   "check": "南沙区 基层医疗数一致",
+   "ok": true,
+   "detail": "9 vs 9"
+  },
+  {
+   "check": "从化区 饭堂数一致",
+   "ok": true,
+   "detail": "27 vs 27"
+  },
+  {
+   "check": "从化区 基层医疗数一致",
+   "ok": true,
+   "detail": "12 vs 12"
+  },
+  {
+   "check": "增城区 饭堂数一致",
+   "ok": true,
+   "detail": "97 vs 97"
+  },
+  {
+   "check": "增城区 基层医疗数一致",
+   "ok": true,
+   "detail": "16 vs 16"
+  },
+  {
+   "check": "荔湾区 床位密度 重算一致",
+   "ok": true,
+   "detail": "重算=25.217 派生表=25.217（按 3 位对齐）"
+  },
+  {
+   "check": "荔湾区 机构密度 重算一致",
+   "ok": true,
+   "detail": "重算=1.482 派生表=1.482（按 3 位对齐）"
+  },
+  {
+   "check": "荔湾区 饭堂密度 重算一致",
+   "ok": true,
+   "detail": "重算=6.120 派生表=6.120（按 3 位对齐）"
+  },
+  {
+   "check": "荔湾区 基层医疗密度 重算一致",
+   "ok": true,
+   "detail": "重算=0.760 派生表=0.760（按 3 位对齐）"
+  },
+  {
+   "check": "荔湾区 80+占60+ 重算一致",
+   "ok": true,
+   "detail": "重算=13.927 派生表=13.900（按 1 位对齐）"
+  },
+  {
+   "check": "荔湾区 60+占比 重算一致",
+   "ok": true,
+   "detail": "重算=32.001 派生表=32.000（按 1 位对齐）"
+  },
+  {
+   "check": "荔湾区 65+占比 重算一致",
+   "ok": true,
+   "detail": "重算=23.319 派生表=23.300（按 1 位对齐）"
+  },
+  {
+   "check": "荔湾区 床位密度敏感度 重算一致",
+   "ok": true,
+   "detail": "重算=27.042 派生表=27.042（按 3 位对齐）"
+  },
+  {
+   "check": "越秀区 床位密度 重算一致",
+   "ok": true,
+   "detail": "重算=9.070 派生表=9.070（按 3 位对齐）"
+  },
+  {
+   "check": "越秀区 机构密度 重算一致",
+   "ok": true,
+   "detail": "重算=0.701 派生表=0.701（按 3 位对齐）"
+  },
+  {
+   "check": "越秀区 饭堂密度 重算一致",
+   "ok": true,
+   "detail": "重算=3.139 派生表=3.139（按 3 位对齐）"
+  },
+  {
+   "check": "越秀区 基层医疗密度 重算一致",
+   "ok": true,
+   "detail": "重算=0.505 派生表=0.505（按 3 位对齐）"
+  },
+  {
+   "check": "越秀区 80+占60+ 重算一致",
+   "ok": true,
+   "detail": "重算=16.329 派生表=16.300（按 1 位对齐）"
+  },
+  {
+   "check": "越秀区 60+占比 重算一致",
+   "ok": true,
+   "detail": "重算=30.818 派生表=30.800（按 1 位对齐）"
+  },
+  {
+   "check": "越秀区 65+占比 重算一致",
+   "ok": true,
+   "detail": "重算=22.574 派生表=22.600（按 1 位对齐）"
+  },
+  {
+   "check": "越秀区 床位密度敏感度 重算一致",
+   "ok": true,
+   "detail": "重算=14.004 派生表=14.004（按 3 位对齐）"
+  },
+  {
+   "check": "海珠区 床位密度 重算一致",
+   "ok": true,
+   "detail": "重算=19.133 派生表=19.133（按 3 位对齐）"
+  },
+  {
+   "check": "海珠区 机构密度 重算一致",
+   "ok": true,
+   "detail": "重算=0.890 派生表=0.890（按 3 位对齐）"
+  },
+  {
+   "check": "海珠区 饭堂密度 重算一致",
+   "ok": true,
+   "detail": "重算=3.025 派生表=3.025（按 3 位对齐）"
+  },
+  {
+   "check": "海珠区 基层医疗密度 重算一致",
+   "ok": true,
+   "detail": "重算=0.534 派生表=0.534（按 3 位对齐）"
+  },
+  {
+   "check": "海珠区 80+占60+ 重算一致",
+   "ok": true,
+   "detail": "重算=15.083 派生表=15.100（按 1 位对齐）"
+  },
+  {
+   "check": "海珠区 60+占比 重算一致",
+   "ok": true,
+   "detail": "重算=30.100 派生表=30.100（按 1 位对齐）"
+  },
+  {
+   "check": "海珠区 65+占比 重算一致",
+   "ok": true,
+   "detail": "重算=22.066 派生表=22.100（按 1 位对齐）"
+  },
+  {
+   "check": "海珠区 床位密度敏感度 重算一致",
+   "ok": true,
+   "detail": "重算=20.794 派生表=20.794（按 3 位对齐）"
+  },
+  {
+   "check": "天河区 床位密度 重算一致",
+   "ok": true,
+   "detail": "重算=18.083 派生表=18.083（按 3 位对齐）"
+  },
+  {
+   "check": "天河区 机构密度 重算一致",
+   "ok": true,
+   "detail": "重算=0.907 派生表=0.907（按 3 位对齐）"
+  },
+  {
+   "check": "天河区 饭堂密度 重算一致",
+   "ok": true,
+   "detail": "重算=7.092 派生表=7.092（按 3 位对齐）"
+  },
+  {
+   "check": "天河区 基层医疗密度 重算一致",
+   "ok": true,
+   "detail": "重算=1.386 派生表=1.386（按 3 位对齐）"
+  },
+  {
+   "check": "天河区 80+占60+ 重算一致",
+   "ok": true,
+   "detail": "重算=16.201 派生表=16.200（按 1 位对齐）"
+  },
+  {
+   "check": "天河区 60+占比 重算一致",
+   "ok": true,
+   "detail": "重算=16.826 派生表=16.800（按 1 位对齐）"
+  },
+  {
+   "check": "天河区 65+占比 重算一致",
+   "ok": true,
+   "detail": "重算=11.679 派生表=11.700（按 1 位对齐）"
+  },
+  {
+   "check": "天河区 床位密度敏感度 重算一致",
+   "ok": true,
+   "detail": "重算=17.600 派生表=17.600（按 3 位对齐）"
+  },
+  {
+   "check": "白云区 床位密度 重算一致",
+   "ok": true,
+   "detail": "重算=55.777 派生表=55.777（按 3 位对齐）"
+  },
+  {
+   "check": "白云区 机构密度 重算一致",
+   "ok": true,
+   "detail": "重算=1.758 派生表=1.758（按 3 位对齐）"
+  },
+  {
+   "check": "白云区 饭堂密度 重算一致",
+   "ok": true,
+   "detail": "重算=10.419 派生表=10.419（按 3 位对齐）"
+  },
+  {
+   "check": "白云区 基层医疗密度 重算一致",
+   "ok": true,
+   "detail": "重算=0.986 派生表=0.986（按 3 位对齐）"
+  },
+  {
+   "check": "白云区 80+占60+ 重算一致",
+   "ok": true,
+   "detail": "重算=13.600 派生表=13.600（按 1 位对齐）"
+  },
+  {
+   "check": "白云区 60+占比 重算一致",
+   "ok": true,
+   "detail": "重算=18.075 派生表=18.100（按 1 位对齐）"
+  },
+  {
+   "check": "白云区 65+占比 重算一致",
+   "ok": true,
+   "detail": "重算=12.854 派生表=12.900（按 1 位对齐）"
+  },
+  {
+   "check": "白云区 床位密度敏感度 重算一致",
+   "ok": true,
+   "detail": "重算=41.648 派生表=41.648（按 3 位对齐）"
+  },
+  {
+   "check": "黄埔区 床位密度 重算一致",
+   "ok": true,
+   "detail": "重算=73.276 派生表=73.276（按 3 位对齐）"
+  },
+  {
+   "check": "黄埔区 机构密度 重算一致",
+   "ok": true,
+   "detail": "重算=1.260 派生表=1.260（按 3 位对齐）"
+  },
+  {
+   "check": "黄埔区 饭堂密度 重算一致",
+   "ok": true,
+   "detail": "重算=18.411 派生表=18.411（按 3 位对齐）"
+  },
+  {
+   "check": "黄埔区 基层医疗密度 重算一致",
+   "ok": true,
+   "detail": "重算=1.647 派生表=1.647（按 3 位对齐）"
+  },
+  {
+   "check": "黄埔区 80+占60+ 重算一致",
+   "ok": true,
+   "detail": "重算=13.856 派生表=13.900（按 1 位对齐）"
+  },
+  {
+   "check": "黄埔区 60+占比 重算一致",
+   "ok": true,
+   "detail": "重算=13.474 派生表=13.500（按 1 位对齐）"
+  },
+  {
+   "check": "黄埔区 65+占比 重算一致",
+   "ok": true,
+   "detail": "重算=9.257 派生表=9.300（按 1 位对齐）"
+  },
+  {
+   "check": "黄埔区 床位密度敏感度 重算一致",
+   "ok": true,
+   "detail": "重算=71.121 派生表=71.121（按 3 位对齐）"
+  },
+  {
+   "check": "番禺区 床位密度 重算一致",
+   "ok": true,
+   "detail": "重算=27.830 派生表=27.830（按 3 位对齐）"
+  },
+  {
+   "check": "番禺区 机构密度 重算一致",
+   "ok": true,
+   "detail": "重算=1.140 派生表=1.140（按 3 位对齐）"
+  },
+  {
+   "check": "番禺区 饭堂密度 重算一致",
+   "ok": true,
+   "detail": "重算=7.980 派生表=7.980（按 3 位对齐）"
+  },
+  {
+   "check": "番禺区 基层医疗密度 重算一致",
+   "ok": true,
+   "detail": "重算=0.829 派生表=0.829（按 3 位对齐）"
+  },
+  {
+   "check": "番禺区 80+占60+ 重算一致",
+   "ok": true,
+   "detail": "重算=13.386 派生表=13.400（按 1 位对齐）"
+  },
+  {
+   "check": "番禺区 60+占比 重算一致",
+   "ok": true,
+   "detail": "重算=15.237 派生表=15.200（按 1 位对齐）"
+  },
+  {
+   "check": "番禺区 65+占比 重算一致",
+   "ok": true,
+   "detail": "重算=10.491 派生表=10.500（按 1 位对齐）"
+  },
+  {
+   "check": "番禺区 床位密度敏感度 重算一致",
+   "ok": true,
+   "detail": "重算=23.655 派生表=23.655（按 3 位对齐）"
+  },
+  {
+   "check": "花都区 床位密度 重算一致",
+   "ok": true,
+   "detail": "重算=37.520 派生表=37.520（按 3 位对齐）"
+  },
+  {
+   "check": "花都区 机构密度 重算一致",
+   "ok": true,
+   "detail": "重算=0.912 派生表=0.912（按 3 位对齐）"
+  },
+  {
+   "check": "花都区 饭堂密度 重算一致",
+   "ok": true,
+   "detail": "重算=2.800 派生表=2.800（按 3 位对齐）"
+  },
+  {
+   "check": "花都区 基层医疗密度 重算一致",
+   "ok": true,
+   "detail": "重算=1.237 派生表=1.237（按 3 位对齐）"
+  },
+  {
+   "check": "花都区 80+占60+ 重算一致",
+   "ok": true,
+   "detail": "重算=12.521 派生表=12.500（按 1 位对齐）"
+  },
+  {
+   "check": "花都区 60+占比 重算一致",
+   "ok": true,
+   "detail": "重算=16.348 派生表=16.300（按 1 位对齐）"
+  },
+  {
+   "check": "花都区 65+占比 重算一致",
+   "ok": true,
+   "detail": "重算=11.302 派生表=11.300（按 1 位对齐）"
+  },
+  {
+   "check": "花都区 床位密度敏感度 重算一致",
+   "ok": true,
+   "detail": "重算=36.740 派生表=36.740（按 3 位对齐）"
+  },
+  {
+   "check": "南沙区 床位密度 重算一致",
+   "ok": true,
+   "detail": "重算=12.710 派生表=12.710（按 3 位对齐）"
+  },
+  {
+   "check": "南沙区 机构密度 重算一致",
+   "ok": true,
+   "detail": "重算=1.293 派生表=1.293（按 3 位对齐）"
+  },
+  {
+   "check": "南沙区 饭堂密度 重算一致",
+   "ok": true,
+   "detail": "重算=13.625 派生表=13.625（按 3 位对齐）"
+  },
+  {
+   "check": "南沙区 基层医疗密度 重算一致",
+   "ok": true,
+   "detail": "重算=0.895 派生表=0.895（按 3 位对齐）"
+  },
+  {
+   "check": "南沙区 80+占60+ 重算一致",
+   "ok": true,
+   "detail": "重算=12.617 派生表=12.600（按 1 位对齐）"
+  },
+  {
+   "check": "南沙区 60+占比 重算一致",
+   "ok": true,
+   "detail": "重算=16.861 派生表=16.900（按 1 位对齐）"
+  },
+  {
+   "check": "南沙区 65+占比 重算一致",
+   "ok": true,
+   "detail": "重算=11.416 派生表=11.400（按 1 位对齐）"
+  },
+  {
+   "check": "南沙区 床位密度敏感度 重算一致",
+   "ok": true,
+   "detail": "重算=13.859 派生表=13.859（按 3 位对齐）"
+  },
+  {
+   "check": "从化区 床位密度 重算一致",
+   "ok": true,
+   "detail": "重算=7.902 派生表=7.902（按 3 位对齐）"
+  },
+  {
+   "check": "从化区 机构密度 重算一致",
+   "ok": true,
+   "detail": "重算=0.907 派生表=0.907（按 3 位对齐）"
+  },
+  {
+   "check": "从化区 饭堂密度 重算一致",
+   "ok": true,
+   "detail": "重算=2.449 派生表=2.449（按 3 位对齐）"
+  },
+  {
+   "check": "从化区 基层医疗密度 重算一致",
+   "ok": true,
+   "detail": "重算=1.089 派生表=1.089（按 3 位对齐）"
+  },
+  {
+   "check": "从化区 80+占60+ 重算一致",
+   "ok": true,
+   "detail": "重算=12.217 派生表=12.200（按 1 位对齐）"
+  },
+  {
+   "check": "从化区 60+占比 重算一致",
+   "ok": true,
+   "detail": "重算=16.449 派生表=16.400（按 1 位对齐）"
+  },
+  {
+   "check": "从化区 65+占比 重算一致",
+   "ok": true,
+   "detail": "重算=10.801 派生表=10.800（按 1 位对齐）"
+  },
+  {
+   "check": "从化区 床位密度敏感度 重算一致",
+   "ok": true,
+   "detail": "重算=9.695 派生表=9.695（按 3 位对齐）"
+  },
+  {
+   "check": "增城区 床位密度 重算一致",
+   "ok": true,
+   "detail": "重算=12.387 派生表=12.387（按 3 位对齐）"
+  },
+  {
+   "check": "增城区 机构密度 重算一致",
+   "ok": true,
+   "detail": "重算=0.616 派生表=0.616（按 3 位对齐）"
+  },
+  {
+   "check": "增城区 饭堂密度 重算一致",
+   "ok": true,
+   "detail": "重算=5.432 派生表=5.432（按 3 位对齐）"
+  },
+  {
+   "check": "增城区 基层医疗密度 重算一致",
+   "ok": true,
+   "detail": "重算=0.896 派生表=0.896（按 3 位对齐）"
+  },
+  {
+   "check": "增城区 80+占60+ 重算一致",
+   "ok": true,
+   "detail": "重算=12.495 派生表=12.500（按 1 位对齐）"
+  },
+  {
+   "check": "增城区 60+占比 重算一致",
+   "ok": true,
+   "detail": "重算=15.287 派生表=15.300（按 1 位对齐）"
+  },
+  {
+   "check": "增城区 65+占比 重算一致",
+   "ok": true,
+   "detail": "重算=10.285 派生表=10.300（按 1 位对齐）"
+  },
+  {
+   "check": "增城区 床位密度敏感度 重算一致",
+   "ok": true,
+   "detail": "重算=13.272 派生表=13.272（按 3 位对齐）"
+  },
+  {
+   "check": "几何量算总面积在合理区间（3000–12000 km²）",
+   "ok": true,
+   "detail": "7414.3 km²"
+  }
+ ]
+}

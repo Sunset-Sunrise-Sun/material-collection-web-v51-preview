@@ -1,0 +1,28 @@
+/* Host theme only. The frozen component owns its Shadow DOM. */
+#chapter-4 .map-integration{display:block;background:transparent;padding:22px 0;border-inline:0;min-width:0}
+#guangzhou-map-slot{min-width:0;width:100%}
+#guangzhou-map-slot .map-provider-canvas{min-width:0}
+#guangzhou-map-slot gz-district-map{display:block;width:100%;min-width:0;min-height:520px;--gz-accent:#315b47;--gz-accent-ink:#234432;--gz-accent-soft:#eaf0e5;--gz-line:#d3dacb;--gz-ink:#23382b;--gz-muted:#596454;--gz-warn-bg:#f6f1e5;--gz-warn-line:#d5c6a4;--gz-warn-ink:#6b5330}
+#guangzhou-map-slot .gz-linked-bars{border-block:1px solid #d1dac8;margin:25px 0 0;padding:21px 0;min-width:0}
+#guangzhou-map-slot .gz-bars-title{font-family:var(--serif);font-size:20px;font-weight:500;line-height:1.6;margin:0 0 7px}
+#guangzhou-map-slot .gz-order-note{font-size:11px;color:var(--muted);line-height:1.8;margin:8px 0 15px}
+#guangzhou-map-slot .gz-linked-row{grid-template-columns:40px minmax(0,1fr) 65px;min-height:38px}
+#guangzhou-map-slot .gz-linked-row strong{font-variant-numeric:tabular-nums}
+#guangzhou-map-slot .gz-linked-row[aria-pressed=true]{background:#e4ecdc;outline:1px solid #748d63;outline-offset:-1px}
+#guangzhou-map-slot .gz-linked-row.map-hover{background:#f0f3e9}
+#guangzhou-map-slot .gz-source-body p{overflow-wrap:anywhere;line-height:1.9}
+#chapter-4 .map-reading-note{font-size:12px;line-height:1.9;color:var(--muted);margin:15px 0}
+#chapter-4 .map-quality{margin:16px 0 0;padding:14px 17px;background:#f3efe4;border-left:2px solid #b49d6b;font-size:12px;line-height:1.85;color:#5f533e}
+#chapter-4 .map-quality p{margin:0 0 8px;font-size:12px}
+#chapter-4 .map-quality ul{margin:8px 0 0;padding-left:18px}
+#chapter-4 .map-quality li{margin-block:5px}
+#chapter-4 .map-original-record{margin:14px 0 22px}
+#chapter-4 .map-original-record>summary{cursor:pointer;font-size:12px;color:var(--accent);padding:14px 0;border-block:1px solid #d4dccb}
+@media(max-width:560px){
+ #chapter-4 .map-integration{padding:14px 0}
+ #guangzhou-map-slot gz-district-map{min-height:420px}
+ #guangzhou-map-slot .gz-linked-row{grid-template-columns:30px minmax(0,1fr) 49px;gap:8px;min-height:40px}
+ #guangzhou-map-slot .gz-bars-title{font-size:17px}
+ #chapter-4 .map-quality{padding:12px;font-size:11px}
+}
+@media print{#chapter-4 .map-integration{display:block}#guangzhou-map-slot gz-district-map{min-height:0}}

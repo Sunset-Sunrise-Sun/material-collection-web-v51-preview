@@ -1,0 +1,272 @@
+{
+  "baseline": "v2报告，正文和原图保持不变；可视化为报告派生展示。未完成官方原始统计表独立复核。",
+  "density": {
+    "title": "广州11区床位供给代理密度",
+    "year": 2025,
+    "unit": "床 / 千名户籍60+人口",
+    "numerator": "项目组名录床位（代理值）",
+    "denominator": "2025年户籍60岁及以上人口",
+    "formula": "项目组名录床位 ÷ 2025年户籍60+人口 × 1000",
+    "source": "v2报告4.1.1嵌入条形图，按图中数值标签逐项转录；保留原排序与两位小数精度。",
+    "sourceAsset": "assets/image3.png",
+    "sourceSection": "s-4-1-1",
+    "median": 19.13,
+    "rows": [
+      {
+        "district": "黄埔",
+        "value": 73.28
+      },
+      {
+        "district": "白云",
+        "value": 55.78
+      },
+      {
+        "district": "花都",
+        "value": 37.52
+      },
+      {
+        "district": "番禺",
+        "value": 27.83
+      },
+      {
+        "district": "荔湾",
+        "value": 25.22
+      },
+      {
+        "district": "海珠",
+        "value": 19.13
+      },
+      {
+        "district": "天河",
+        "value": 18.08
+      },
+      {
+        "district": "南沙",
+        "value": 12.71
+      },
+      {
+        "district": "增城",
+        "value": 12.39
+      },
+      {
+        "district": "越秀",
+        "value": 9.07
+      },
+      {
+        "district": "从化",
+        "value": 7.9
+      }
+    ],
+    "finding": "原图中黄埔最高、从化最低，区际床位供给代理密度差异明显。",
+    "explanation": "虚线为11区中位数19.13；沿用原图的项目组名录口径，不与全市官方床位总量直接混合。",
+    "boundary": "这是区级供给代理指标，不能直接解释为服务可及性、真实需求缺口或街镇级供需匹配；尚缺逐区原始分子、分母的独立复算。",
+    "sourceLabel": "来源：v2报告4.1.1嵌入原图（image3），按原图标签转录。"
+  },
+  "annual": {
+    "title": "2024—2025年养老供给与人口背景变化",
+    "years": [
+      2024,
+      2025
+    ],
+    "unit": "相对2024年的变化率（%）",
+    "formula": "（2025年值 − 2024年值）÷ 2024年值 × 100%",
+    "source": "v2报告4.1.3正文（源段66—68），研究方法3.3说明据2024、2025年官方公布数据作同指标同比。此处核对报告内数值与算术，不声称已独立核验官方原表。",
+    "sourceSection": "s-4-1-3",
+    "rows": [
+      {
+        "id": "elderly",
+        "label": "户籍60+人口",
+        "before": 2129200,
+        "after": 2216893,
+        "unit": "人",
+        "reportedPercent": 4.12,
+        "precision": 2,
+        "group": "人口背景",
+        "sourceIndex": 66
+      },
+      {
+        "id": "institutions",
+        "label": "养老机构数",
+        "before": 297,
+        "after": 257,
+        "unit": "家",
+        "reportedPercent": -13.5,
+        "precision": 1,
+        "group": "供给",
+        "sourceIndex": 66
+      },
+      {
+        "id": "beds",
+        "label": "机构床位",
+        "before": 60144,
+        "after": 57421,
+        "unit": "张",
+        "reportedPercent": -4.5,
+        "precision": 1,
+        "group": "供给",
+        "sourceIndex": 66
+      },
+      {
+        "id": "nursing",
+        "label": "护理型床位",
+        "before": 55975,
+        "after": 54685,
+        "unit": "张",
+        "reportedPercent": -2.3,
+        "precision": 1,
+        "group": "供给",
+        "sourceIndex": 66
+      },
+      {
+        "id": "bedDensity",
+        "label": "官方床位密度",
+        "before": 28.25,
+        "after": 25.9,
+        "unit": "床/千名户籍60+人口",
+        "reportedPercent": -8.3,
+        "precision": 1,
+        "group": "供给",
+        "sourceIndex": 66
+      },
+      {
+        "id": "homeVisits",
+        "label": "居家上门服务",
+        "before": 408500,
+        "after": 776000,
+        "unit": "人次",
+        "reportedPercent": 90.0,
+        "precision": 1,
+        "group": "供给",
+        "sourceIndex": 67
+      },
+      {
+        "id": "facilities",
+        "label": "社区设施",
+        "before": 4402,
+        "after": 4660,
+        "unit": "个",
+        "reportedPercent": 5.9,
+        "precision": 1,
+        "group": "供给",
+        "sourceIndex": 67
+      },
+      {
+        "id": "stations",
+        "label": "颐康站",
+        "before": 2725,
+        "after": 2686,
+        "unit": "个",
+        "reportedPercent": -1.4,
+        "precision": 1,
+        "group": "供给",
+        "sourceIndex": 67
+      },
+      {
+        "id": "canteens",
+        "label": "长者饭堂",
+        "before": 1386,
+        "after": 1390,
+        "unit": "个",
+        "reportedPercent": 0.3,
+        "precision": 1,
+        "group": "供给",
+        "sourceIndex": 67
+      }
+    ],
+    "finding": "机构床位减少，居家上门服务人次扩张，供给结构呈现不同方向的变化。",
+    "explanation": "仅比较两个年度端点，所有条形使用同一变化率尺度；人口指标单列为背景，不计为供给产出。",
+    "boundary": "人次不是受益人数，也不是AI服务量；数量变化不能证明质量改善或AI增量效果。不同指标原始单位不同，不能把数量直接相加。",
+    "sourceLabel": "来源：v2报告4.1.3列示的2024、2025年数据；官方原表尚未独立复核。"
+  },
+  "correlations": {
+    "title": "床位密度与老年人口结构的相关分析",
+    "method": "Spearman秩相关",
+    "n": 11,
+    "source": "v2报告4.1.1正文（源段59）；以下为报告统计结果的原样展示，未基于完整配对表重新计算。",
+    "sourceSection": "s-4-1-1",
+    "rows": [
+      {
+        "indicator": "老龄化率",
+        "rho": -0.273,
+        "p": 0.417
+      },
+      {
+        "indicator": "高龄化率（80+占60+）",
+        "rho": 0.118,
+        "p": 0.729
+      },
+      {
+        "indicator": "80+人口规模",
+        "rho": -0.045,
+        "p": 0.894
+      }
+    ],
+    "finding": "报告列示的三组相关均未达到统计显著水平。",
+    "explanation": "未显著不等于证明完全无关联，也不能据此判定因果机制。",
+    "boundary": "尚未取得与v2口径逐项核对的11区完整配对数据；不从散点图像素推算数值，不新增动态散点或指标切换。",
+    "sourceLabel": "来源：v2报告4.1.1统计结论，未重新计算。"
+  },
+  "comparison": {
+    "S1": {
+      "why": "安装数不等于在用户数；告警分母与漏报情况不清，现有报道也未充分证明救援事件均由AI触发。",
+      "sourceIndices": [
+        71,
+        72,
+        73
+      ]
+    },
+    "S5": {
+      "why": "34,884人的筛查记录是非AI运行基线；现有材料未证明“惠记忆”普通版使用AI，不能把这一基线解释为已验证的AI效果。",
+      "sourceIndices": [
+        75,
+        76
+      ]
+    }
+  },
+  "fieldThemes": [
+    {
+      "section": "4.4.1",
+      "observation": "教学中出现语言、界面、个人信息填写及自我预期等使用门槛。",
+      "implication": "考虑方言语音、界面一致性，减少不必要的敏感信息收集。",
+      "sourceIndices": [
+        84,
+        85,
+        86,
+        87,
+        106,
+        107
+      ]
+    },
+    {
+      "section": "4.4.2",
+      "observation": "三位长者对便利的向往，与对诈骗和错误回答的警惕并存。",
+      "implication": "信任机制与隐私保护可能影响使用意愿，需在更大范围中验证。",
+      "sourceIndices": [
+        89,
+        90,
+        91,
+        92,
+        107
+      ]
+    },
+    {
+      "section": "4.4.3",
+      "observation": "数字学习依托熟悉的活动中心、社交活动与熟人关系发生。",
+      "implication": "将技术引入家庭、社区等既有服务场景。",
+      "sourceIndices": [
+        95,
+        96,
+        108
+      ]
+    },
+    {
+      "section": "4.4.4",
+      "observation": "社工提示资金、人力、价格、售后及安全方面的落地约束。",
+      "implication": "把成本核算、人员培训、售后保障和人工兜底纳入承接条件。",
+      "sourceIndices": [
+        98,
+        109
+      ]
+    }
+  ]
+}

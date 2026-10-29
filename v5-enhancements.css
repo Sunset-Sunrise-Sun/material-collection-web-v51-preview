@@ -1,0 +1,92 @@
+/* V5 interaction affordance layer.
+   Native <summary> remains the control; this only enlarges/raises contrast of the row.
+   The timeline keeps its existing +/− layout. */
+details > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: #edf2e8;
+  border: 1px solid #cbd7c3;
+  border-radius: 4px;
+  color: var(--accent);
+  font-size: 13px;
+  line-height: 1.6;
+  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before {
+  content: '▸';
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #9fb294;
+  border-radius: 50%;
+  background: #f9fbf6;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--accent);
+}
+details[open] > summary::before { content: '▾'; background: #dfe9d8; }
+details > summary:hover { background: #e3ebdd; border-color: #9eb293; }
+details[open] > summary { background: #e3ebdd; border-color: #9eb293; }
+details > summary:focus-visible {
+  outline: 3px solid #6f8c63;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px #eaf0e5;
+}
+/* existing compact disclosure labels get the larger treatment without changing content */
+.chart-source > summary,
+.full-argument > summary,
+.audit-table-disclosure > summary,
+.analysis-disclosure > summary,
+.comparison-extra > summary,
+.reading-evidence > summary,
+.original-extra > summary,
+.chapter-tools > summary,
+.scope-details > summary,
+.map-original-record > summary,
+.figure-placeholder summary {
+  font-size: 13px;
+}
+/* timeline already has its own +/− marker and grid; do not replace it */
+.timeline-stage > summary {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  min-height: 0;
+  padding: 24px 0;
+}
+.timeline-stage > summary::before { display: none; }
+
+/* map boundary attribution and review status: always visible next to the map */
+.map-attribution {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.9;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.map-attribution a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.map-review-note {
+  margin: 8px 0 0;
+  padding: 10px 13px;
+  font-size: 11px;
+  line-height: 1.9;
+  color: #6b5439;
+  background: #f6f1e5;
+  border-left: 2px solid #b49d6b;
+}
+@media (max-width: 560px) {
+  details > summary { font-size: 12px; padding: 10px 11px; gap: 8px; }
+  .timeline-stage > summary { padding: 19px 0; }
+  .map-attribution, .map-review-note { font-size: 10px; }
+}
+@media print {
+  details > summary { background: transparent; border: 0; padding: 0; min-height: 0; }
+  details > summary::before { display: none; }
+  .map-attribution, .map-review-note { display: none; }
+}
